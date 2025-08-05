@@ -700,16 +700,18 @@ export function AppointmentsPage() {
                                                 <CardDescription>
                                                     {serviceTypes[appointment.service_type as keyof typeof serviceTypes]}
                                                     {isAdmin && appointment.pets.profiles && (
-                                                        <div className="mt-2 text-sm">
-                                                            <div className="font-medium text-foreground">
+                                                        // Mude a div externa para um span com display: block
+                                                        <span className="mt-2 text-sm block">
+                                                            <span className="font-medium text-foreground block">
                                                                 Cliente: {appointment.pets.profiles.full_name || 'Nome não informado'}
-                                                            </div>
+                                                            </span>
                                                             {appointment.pets.profiles.phone && (
-                                                                <div className="text-muted-foreground">
+                                                                // Mude a div interna para um span
+                                                                <span className="text-muted-foreground">
                                                                     Tel: {appointment.pets.profiles.phone}
-                                                                </div>
+                                                                </span>
                                                             )}
-                                                        </div>
+                                                        </span>
                                                     )}
                                                 </CardDescription>
                                             </CardHeader>
