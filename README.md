@@ -92,8 +92,7 @@ Crie um arquivo `.env.local` na raiz do projeto:
 NEXT_PUBLIC_SUPABASE_URL=sua_url_do_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima_do_supabase
 
-# Email Configuration (opcional)
-RESEND_API_KEY=sua_chave_do_resend
+
 ```
 
 ### 4. Configure o banco de dados

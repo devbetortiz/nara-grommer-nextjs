@@ -24,17 +24,7 @@ const expectedFunctions = [
 
 // Validações específicas
 const validations = {
-  // Verificar versões consistentes do Resend
-  resendVersion: (content, functionName) => {
-    const resendImports = content.match(/from "npm:resend@([\d\.]+)"/g);
-    if (resendImports) {
-      const versions = resendImports.map(imp => imp.match(/@([\d\.]+)/)[1]);
-      if (versions.some(v => v !== '4.0.0')) {
-        return `❌ ${functionName}: Versão inconsistente do Resend (esperado: 4.0.0, encontrado: ${versions.join(', ')})`;
-      }
-    }
-    return null;
-  },
+  
 
   // Verificar versões do Supabase
   supabaseVersion: (content, functionName) => {
@@ -53,7 +43,7 @@ const validations = {
     const hardcodedPatterns = [
       /https:\/\/nara-pawsome-schedule\.lovable\.app/g,
       /https:\/\/lovable\.app/g,
-      /NaraGrommer@resend\.dev/g
+      
     ];
     
     for (const pattern of hardcodedPatterns) {
@@ -216,7 +206,6 @@ function main() {
     console.log('\n🎉 Todas as Edge Functions estão configuradas corretamente!');
     console.log('💡 Próximos passos:');
     console.log('   1. Deploy das funções: supabase functions deploy');
-    console.log('   2. Teste das funções: npm run test-resend');
     console.log('   3. Configurar variáveis de ambiente no Supabase');
   } else {
     console.log('\n💥 Problemas encontrados que precisam ser corrigidos:');
