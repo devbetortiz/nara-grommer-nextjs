@@ -21,7 +21,7 @@ const ClientWelcome = () => {
     if (!roleLoading && isAdmin) {
       router.push("/dashboard");
     }
-  }, [isAdmin, roleLoading, router.push]);
+  }, [isAdmin, roleLoading, router]);
 
   useEffect(() => {
     const fetchClientName = async () => {

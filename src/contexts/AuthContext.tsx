@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -68,22 +68,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up existing state first
       try {
         await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
+      } catch {
         // Continue even if this fails
       }
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       if (data.user) {
         // Force page reload for clean state
         window.location.href = '/';
       }
-      
+
       return { error: null };
     } catch (error) {
       return { error };
@@ -101,14 +101,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPassword = async (email: string) => {
-    const { data, error } = await supabase.functions.invoke('send-password-reset', {
+    const { error } = await supabase.functions.invoke('send-password-reset', {
       body: { email }
     });
-    
+
     if (error) {
       return { error };
     }
-    
+
     return { error: null };
   };
 

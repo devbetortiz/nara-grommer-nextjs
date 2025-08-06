@@ -15,8 +15,8 @@ import { Header } from '@/components/Header';
 
 interface UserData {
   id: string;
-  email: string;
-  full_name: string;
+  email: string | null;
+  full_name: string | null;
   created_at: string;
   role?: 'admin' | 'user';
 }
@@ -35,13 +35,13 @@ const UserManagement = () => {
     } else if (!roleLoading && !isAdmin) {
       router.push('/');
     }
-  }, [user, isAdmin, authLoading, roleLoading, router.push]);
+  }, [user, isAdmin, authLoading, roleLoading, router]);
 
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
     }
-  }, [isAdmin]);
+  }, [isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchUsers = async () => {
     try {

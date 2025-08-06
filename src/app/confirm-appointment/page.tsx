@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -18,7 +18,7 @@ interface AppointmentData {
 }
 
 const ConfirmAppointment = () => {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'already_confirmed'>('loading');
   const [message, setMessage] = useState('');
   const [appointment, setAppointment] = useState<AppointmentData | null>(null);
@@ -277,4 +277,10 @@ const ConfirmAppointment = () => {
   );
 };
 
-export default ConfirmAppointment;
+export default function ConfirmAppointmentPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <ConfirmAppointment />
+    </Suspense>
+  );
+}

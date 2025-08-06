@@ -1,4 +1,4 @@
-import { useAuth } from '@/contexts/AuthContext';
+
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,13 +18,13 @@ interface EmailData {
 type EmailType = 'welcome' | 'appointment_confirmation' | 'appointment_reminder';
 
 export const useEmailNotifications = () => {
-  const { user } = useAuth();
+
   const { toast } = useToast();
 
   const sendEmail = async (type: EmailType, to: string, data: EmailData) => {
     try {
       console.log(`Enviando email tipo: ${type} para: ${to}`);
-      
+
       const { data: response, error } = await supabase.functions.invoke('send-notification-email', {
         body: {
           type,
@@ -48,7 +48,7 @@ export const useEmailNotifications = () => {
       console.error('Erro ao enviar email:', error);
       toast({
         title: "Erro ao enviar email",
-        description: error.message || "Não foi possível enviar o email de notificação",
+        description: (error as { message?: string })?.message || "Não foi possível enviar o email de notificação",
         variant: "destructive",
       });
       throw error;

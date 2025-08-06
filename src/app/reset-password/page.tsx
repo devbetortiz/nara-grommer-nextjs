@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart, PawPrint } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-export default function ResetPassword() {
+function ResetPasswordContent() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -64,7 +64,7 @@ export default function ResetPassword() {
         } else {
           setTokenValid(true);
         }
-      } catch (error) {
+      } catch {
         toast({
           title: "Erro",
           description: "Erro ao validar token de redefinição.",
@@ -134,7 +134,7 @@ export default function ResetPassword() {
         });
         router.push('/auth');
       }
-    } catch (error: unknown) {
+    } catch {
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao redefinir a senha.",
@@ -242,5 +242,13 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

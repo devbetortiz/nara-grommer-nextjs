@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
-import { Plus, Eye, Edit, Trash2, PawPrint, ArrowLeft, Heart, LogOut, Save, X } from "lucide-react";
+import { Plus, Edit, PawPrint, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,7 +50,7 @@ const Clients = () => {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const { hasClientData, loading: clientDataLoading } = useClientData();
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -79,7 +79,7 @@ const Clients = () => {
       setProfile({ ...profileData, pets_count: count || 0 });
     } catch (error: unknown) {
       console.error('Error fetching profile:', error);
-      if (error.code !== 'PGRST116') {
+      if ((error as { code?: string })?.code !== 'PGRST116') {
         toast({
           title: "Erro",
           description: "Erro ao carregar dados do perfil",
@@ -89,7 +89,7 @@ const Clients = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // Função para parsear endereço do formato string para campos separados
   const parseAddress = (address: string) => {
@@ -155,7 +155,7 @@ const Clients = () => {
   };
 
   // Função para juntar campos de contato de emergência em JSON
-  const buildEmergencyContact = (contactData: unknown) => {
+  const buildEmergencyContact = (contactData: { emergencyName: string; emergencyRelation: string; emergencyPhone: string }) => {
     return JSON.stringify({
       name: contactData.emergencyName,
       relationship: contactData.emergencyRelation,
@@ -164,7 +164,7 @@ const Clients = () => {
   };
 
   // Função para juntar campos separados em JSON de endereço  
-  const buildAddress = (addressData: unknown) => {
+  const buildAddress = (addressData: { street: string; number: string; complement: string; neighborhood: string; city: string; zipCode: string }) => {
     return JSON.stringify({
       street: addressData.street,
       number: addressData.number,
@@ -247,7 +247,7 @@ const Clients = () => {
       console.error('Erro ao salvar:', error);
       toast({
         title: "Erro",
-        description: error.message || "Erro ao salvar os dados.",
+        description: (error as { message?: string })?.message || "Erro ao salvar os dados.",
         variant: "destructive",
       });
     } finally {
@@ -260,13 +260,13 @@ const Clients = () => {
     if (!roleLoading && !isAdmin && !clientDataLoading && hasClientData === false) {
       router.push("/clients/new");
     }
-  }, [roleLoading, isAdmin, clientDataLoading, hasClientData, router.push]);
+  }, [roleLoading, isAdmin, clientDataLoading, hasClientData, router]);
 
   useEffect(() => {
     if (!roleLoading) {
       fetchProfile();
     }
-  }, [user, roleLoading]);
+  }, [user, roleLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading || roleLoading || clientDataLoading) {
     return (

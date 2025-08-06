@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Header } from '@/components/Header';
 import { useUserRole } from '@/hooks/useUserRole';
-import { Moon, Sun, Monitor, Settings as SettingsIcon, User, Bell, Shield, Palette } from 'lucide-react';
+import { Moon, Sun, Monitor, Settings as SettingsIcon, User, Bell, Palette } from 'lucide-react';
 
 const Settings = () => {
   const { user } = useAuth();

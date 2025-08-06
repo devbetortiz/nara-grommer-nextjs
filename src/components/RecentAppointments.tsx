@@ -10,6 +10,24 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface RawAppointmentData {
+  id: string;
+  appointment_date: string;
+  appointment_time: string;
+  service_type: string;
+  status: string;
+  price: number | null;
+  notes: string | null;
+  pets?: {
+    name: string;
+    breed: string | null;
+  };
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+  };
+}
+
 interface RecentAppointment {
   id: string;
   appointment_date: string;
@@ -80,13 +98,13 @@ export const RecentAppointments = () => {
         const today = new Date();
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
-        
+
         // Garantir que estamos usando o fuso horário local
-        const todayStr = today.getFullYear() + '-' + 
-          String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+        const todayStr = today.getFullYear() + '-' +
+          String(today.getMonth() + 1).padStart(2, '0') + '-' +
           String(today.getDate()).padStart(2, '0');
-        const nextWeekStr = nextWeek.getFullYear() + '-' + 
-          String(nextWeek.getMonth() + 1).padStart(2, '0') + '-' + 
+        const nextWeekStr = nextWeek.getFullYear() + '-' +
+          String(nextWeek.getMonth() + 1).padStart(2, '0') + '-' +
           String(nextWeek.getDate()).padStart(2, '0');
 
         const { data, error: queryError } = await supabase
@@ -117,7 +135,7 @@ export const RecentAppointments = () => {
           return;
         }
 
-        const formattedAppointments = data.map((appointment: unknown) => ({
+        const formattedAppointments = data.map((appointment: RawAppointmentData) => ({
           id: appointment.id,
           appointment_date: appointment.appointment_date,
           appointment_time: appointment.appointment_time,
@@ -127,11 +145,11 @@ export const RecentAppointments = () => {
           notes: appointment.notes,
           pet: {
             name: appointment.pets?.name || 'Pet não encontrado',
-            breed: appointment.pets?.breed
+            breed: appointment.pets?.breed ?? null
           },
           user: {
-            full_name: appointment.profiles?.full_name,
-            email: appointment.profiles?.email || 'Usuário não encontrado'
+            full_name: appointment.profiles?.full_name ?? null,
+            email: appointment.profiles?.email ?? null
           }
         }));
 
@@ -203,7 +221,7 @@ export const RecentAppointments = () => {
     );
   }
 
-  const nextAppointment = appointments.find(apt => 
+  const nextAppointment = appointments.find(apt =>
     apt.status === 'agendado' || apt.status === 'confirmado'
   );
 
@@ -218,9 +236,9 @@ export const RecentAppointments = () => {
           </Badge>
         </CardTitle>
         <CardDescription>
-          {nextAppointment 
+          {nextAppointment
             ? `Próximo: ${format(new Date(nextAppointment.appointment_date + 'T00:00:00'), 'dd/MM', { locale: ptBR })} às ${nextAppointment.appointment_time.slice(0, 5)} - ${nextAppointment.pet.name}`
-            : appointments.length > 0 
+            : appointments.length > 0
               ? 'Próximos 7 dias'
               : 'Nenhum agendamento nos próximos 7 dias'
           }
@@ -236,7 +254,7 @@ export const RecentAppointments = () => {
           <div className="space-y-4">
             <div className="max-h-60 overflow-y-auto space-y-3">
               {appointments.slice(0, 5).map((appointment) => (
-                <div 
+                <div
                   key={appointment.id}
                   className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20"
                 >
@@ -297,7 +315,7 @@ export const RecentAppointments = () => {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4 text-muted-foreground" />
@@ -344,7 +362,7 @@ export const RecentAppointments = () => {
                 </div>
               ))}
             </div>
-            
+
             {appointments.length > 5 && (
               <div className="text-center pt-2">
                 <p className="text-sm text-muted-foreground">

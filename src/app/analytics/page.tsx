@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, Users, Clock, TrendingUp, ShieldAlert, BarChart3, PieChart, Target, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format, subDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
+import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Header } from "@/components/Header";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Cell, BarChart, Bar, Pie } from 'recharts';
@@ -41,6 +41,14 @@ interface DailyStats {
   revenue: number;
 }
 
+interface MonthlyStats {
+  month: string;
+  appointments: number;
+  revenue: number;
+  completed: number;
+  canceled: number;
+}
+
 const COLORS = ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6'];
 
 const serviceTypeNames = {
@@ -66,21 +74,10 @@ const Analytics = () => {
   const [petStats, setPetStats] = useState<PetStats>({ total: 0, byBreed: [] });
   const [serviceStats, setServiceStats] = useState<ServiceStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
-  const [monthlyStats, setMonthlyStats] = useState<unknown>([]);
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/auth");
-      return;
-    }
-
-    if (user && !roleLoading) {
-      loadAnalytics();
-    }
-  }, [user, loading, router.push, roleLoading, isAdmin]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -247,7 +244,18 @@ const Analytics = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAdmin, user, toast, roleLoading]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth");
+      return;
+    }
+
+    if (user && !roleLoading) {
+      loadAnalytics();
+    }
+  }, [user, loading, router, roleLoading, isAdmin, loadAnalytics]);
 
   if (loading || roleLoading || isLoading) {
     return (

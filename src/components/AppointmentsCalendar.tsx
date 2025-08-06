@@ -244,7 +244,7 @@ export const AppointmentsCalendar = () => {
           ))}
 
           {/* Calendar days */}
-          {calendarDays.map((day, index) => {
+          {calendarDays.map((day) => {
             const dayAppointments = getDayAppointments(day);
             const isCurrentMonth = isSameMonth(day, currentDate);
             const isToday = isSameDay(day, new Date());

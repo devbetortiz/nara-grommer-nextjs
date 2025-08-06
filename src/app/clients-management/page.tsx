@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Users, Edit, Trash2, Search, UserCheck, PawPrint, Eye } from 'lucide-react';
+import { Users, Edit, Trash2, Search, UserCheck, PawPrint } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Header } from '@/components/Header';
 
@@ -92,13 +92,13 @@ const ClientManagement = () => {
     } else if (!roleLoading && !isAdmin) {
       router.push('/');
     }
-  }, [user, isAdmin, authLoading, roleLoading, router.push]);
+  }, [user, isAdmin, authLoading, roleLoading, router]);
 
   useEffect(() => {
     if (isAdmin) {
       fetchClients();
     }
-  }, [isAdmin]);
+  }, [isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const filtered = clients.filter(client =>

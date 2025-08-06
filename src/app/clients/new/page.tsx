@@ -42,7 +42,7 @@ const ClientRegistration = () => {
   const { sendWelcomeEmail } = useEmailNotifications();
   const { user } = useAuth();
   const { hasClientData, loading: clientDataLoading } = useClientData();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin } = useUserRole();
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -186,7 +186,7 @@ const ClientRegistration = () => {
       console.error('Erro ao salvar perfil:', error);
       toast({
         title: "Erro",
-        description: error.message || "Erro ao salvar suas informações.",
+        description: (error as { message?: string })?.message || "Erro ao salvar suas informações.",
         variant: "destructive",
       });
     } finally {

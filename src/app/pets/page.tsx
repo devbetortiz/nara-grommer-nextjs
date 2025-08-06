@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -70,10 +70,10 @@ const Pets = () => {
         fetchClients();
       }
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
-  const fetchPets = async () => {
+  const fetchPets = useCallback(async () => {
     try {
       let query = supabase
         .from('pets')
@@ -104,9 +104,9 @@ const Pets = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAdmin, user, toast]);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -123,7 +123,7 @@ const Pets = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
 
   const uploadPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;

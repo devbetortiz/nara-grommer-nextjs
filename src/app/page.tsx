@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, PawPrint, Calendar, BarChart3, User, Settings } from 'lucide-react';
+import { PawPrint, Calendar, BarChart3, User, Settings } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useClientData } from '@/hooks/useClientData';
 import { Header } from '@/components/Header';

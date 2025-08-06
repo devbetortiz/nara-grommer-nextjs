@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useClientData } from '@/hooks/useClientData';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, PawPrint, Calendar, LogOut, BarChart3, Users, ArrowLeft, TrendingUp, DollarSign, Clock, Star, CheckCircle, AlertCircle, Activity, CalendarDays, UserPlus } from 'lucide-react';
+import { PawPrint, Calendar, BarChart3, Users, CheckCircle, AlertCircle, Activity, CalendarDays, UserPlus, Clock } from 'lucide-react';
 import { TomorrowAppointments } from '@/components/TomorrowAppointments';
 import { RecentAppointments } from '@/components/RecentAppointments';
 import { useTomorrowAppointments } from '@/hooks/useTomorrowAppointments';
@@ -21,7 +21,7 @@ import { Header } from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function DashboardPage() {
-    const { user, signOut } = useAuth();
+    const { } = useAuth();
     const router = useRouter();
     const { isAdmin, loading: roleLoading } = useUserRole();
 
@@ -47,7 +47,6 @@ export default function DashboardPage() {
             try {
                 setLoading(true);
                 const today = new Date().toISOString().split('T')[0];
-                const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
                 // Fetch all dashboard data in parallel
                 const [

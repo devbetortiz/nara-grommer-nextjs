@@ -124,13 +124,13 @@ export function AppointmentsPage() {
             }
             fetchAppointments();
         }
-    }, [user, isAdmin, roleLoading]);
+    }, [user, isAdmin, roleLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (isAdmin && selectedClientId) {
             fetchPetsForClient(selectedClientId);
         }
-    }, [selectedClientId, isAdmin]);
+    }, [selectedClientId, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchClients = async () => {
         try {

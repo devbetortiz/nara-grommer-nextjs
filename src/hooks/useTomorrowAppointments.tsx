@@ -28,7 +28,7 @@ export const useTomorrowAppointments = () => {
   useEffect(() => {
     const fetchTomorrowAppointments = async () => {
       console.log('fetchTomorrowAppointments started, isAdmin:', isAdmin);
-      
+
       if (!isAdmin) {
         console.log('User is not admin, skipping fetch');
         setLoading(false);
@@ -40,7 +40,7 @@ export const useTomorrowAppointments = () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
-        
+
         console.log('Searching for appointments on:', tomorrowStr);
 
         const { data, error: queryError } = await supabase
@@ -100,11 +100,11 @@ export const useTomorrowAppointments = () => {
               notes: appointment.notes,
               pet: {
                 name: petData?.name || 'Pet não encontrado',
-                breed: petData?.breed
+                breed: petData?.breed ?? null
               },
               user: {
-                full_name: userData?.full_name,
-                email: userData?.email || 'Usuário não encontrado'
+                full_name: userData?.full_name ?? null,
+                email: userData?.email ?? null
               }
             };
           })

@@ -25,7 +25,7 @@ export const RecentActivity = () => {
     const fetchRecentActivity = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch recent appointments
         const { data: appointments } = await supabase
           .from('appointments')
@@ -67,7 +67,7 @@ export const RecentActivity = () => {
         appointments?.forEach(appointment => {
           const petName = appointment.pets?.name || 'Pet';
           const userName = appointment.profiles?.full_name || 'Cliente';
-          
+
           if (appointment.status === 'concluido') {
             activityList.push({
               id: `appointment-${appointment.id}`,
@@ -126,7 +126,7 @@ export const RecentActivity = () => {
             action: 'cadastrado',
             description: `Novo cliente: ${user.full_name || 'Sem nome'}`,
             timestamp: user.created_at,
-            userName: user.full_name
+            userName: user.full_name ?? undefined
           });
         });
 
@@ -172,7 +172,7 @@ export const RecentActivity = () => {
     }
   };
 
-  const getStatusBadge = (action: string, status?: string) => {
+  const getStatusBadge = (action: string) => {
     if (action === 'concluído') {
       return <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Concluído</Badge>;
     }
@@ -252,7 +252,7 @@ export const RecentActivity = () => {
                     {getActivityIcon(activity.type)}
                     <span className="text-sm font-medium">{activity.description}</span>
                   </div>
-                  {getStatusBadge(activity.action, activity.status)}
+                  {getStatusBadge(activity.action)}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />

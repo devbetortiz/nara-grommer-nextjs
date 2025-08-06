@@ -52,9 +52,9 @@ export default function Auth() {
     if (error) {
       toast({
         title: "Erro no login",
-        description: error.message === "Invalid login credentials"
+        description: (error as { message?: string })?.message === "Invalid login credentials"
           ? "E-mail ou senha incorretos."
-          : error.message,
+          : (error as { message?: string })?.message || "Erro desconhecido",
         variant: "destructive"
       });
     }
@@ -92,7 +92,7 @@ export default function Auth() {
 
     const { error } = await signUp(signupData.email, signupData.password, signupData.fullName);
     if (error) {
-      if (error.message.includes("already registered") || error.message.includes("User already registered")) {
+      if ((error as { message?: string })?.message?.includes("already registered") || (error as { message?: string })?.message?.includes("User already registered")) {
         toast({
           title: "E-mail já cadastrado",
           description: "Este e-mail já possui uma conta. Tente fazer login ou use outro e-mail.",
@@ -103,7 +103,7 @@ export default function Auth() {
       } else {
         toast({
           title: "Erro no cadastro",
-          description: error.message,
+          description: (error as { message?: string })?.message || "Erro desconhecido",
           variant: "destructive"
         });
       }
@@ -138,7 +138,7 @@ export default function Auth() {
     if (error) {
       toast({
         title: "Erro",
-        description: error.message,
+        description: (error as { message?: string })?.message || "Erro desconhecido",
         variant: "destructive"
       });
     } else {
