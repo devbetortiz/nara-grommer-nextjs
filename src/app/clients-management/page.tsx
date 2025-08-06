@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -615,7 +615,7 @@ const ClientManagement = () => {
                       <Card key={pet.id} className="overflow-hidden border-2 border-primary/10 hover:border-primary/20 transition-colors">
                         {pet.photo_url && (
                           <div className="h-48 overflow-hidden">
-                            <img
+                            <Image
                               src={pet.photo_url}
                               alt={pet.name}
                               className="w-full h-full object-cover transition-transform hover:scale-105"

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -404,7 +404,7 @@ const Pets = () => {
                 <Card key={pet.id} className="overflow-hidden">
                   {pet.photo_url && (
                     <div className="h-48 overflow-hidden">
-                      <img
+                      <Image
                         src={pet.photo_url}
                         alt={pet.name}
                         className="w-full h-full object-cover"
