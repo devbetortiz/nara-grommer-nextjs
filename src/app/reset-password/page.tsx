@@ -134,7 +134,7 @@ export default function ResetPassword() {
         });
         router.push('/auth');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao redefinir a senha.",

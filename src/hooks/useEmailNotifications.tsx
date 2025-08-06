@@ -44,7 +44,7 @@ export const useEmailNotifications = () => {
       console.log('Email enviado com sucesso:', response);
       return response;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao enviar email:', error);
       toast({
         title: "Erro ao enviar email",

@@ -117,7 +117,7 @@ export const RecentAppointments = () => {
           return;
         }
 
-        const formattedAppointments = data.map((appointment: any) => ({
+        const formattedAppointments = data.map((appointment: unknown) => ({
           id: appointment.id,
           appointment_date: appointment.appointment_date,
           appointment_time: appointment.appointment_time,

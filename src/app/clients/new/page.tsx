@@ -182,7 +182,7 @@ const ClientRegistration = () => {
       } else {
         router.push("/clients/welcome");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar perfil:', error);
       toast({
         title: "Erro",

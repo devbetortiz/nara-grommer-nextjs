@@ -66,7 +66,7 @@ const Analytics = () => {
   const [petStats, setPetStats] = useState<PetStats>({ total: 0, byBreed: [] });
   const [serviceStats, setServiceStats] = useState<ServiceStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
-  const [monthlyStats, setMonthlyStats] = useState<any[]>([]);
+  const [monthlyStats, setMonthlyStats] = useState<unknown>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

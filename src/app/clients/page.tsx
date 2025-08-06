@@ -77,7 +77,7 @@ const Clients = () => {
         .eq("user_id", user.id);
 
       setProfile({ ...profileData, pets_count: count || 0 });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching profile:', error);
       if (error.code !== 'PGRST116') {
         toast({
@@ -155,7 +155,7 @@ const Clients = () => {
   };
 
   // Função para juntar campos de contato de emergência em JSON
-  const buildEmergencyContact = (contactData: any) => {
+  const buildEmergencyContact = (contactData: unknown) => {
     return JSON.stringify({
       name: contactData.emergencyName,
       relationship: contactData.emergencyRelation,
@@ -164,7 +164,7 @@ const Clients = () => {
   };
 
   // Função para juntar campos separados em JSON de endereço  
-  const buildAddress = (addressData: any) => {
+  const buildAddress = (addressData: unknown) => {
     return JSON.stringify({
       street: addressData.street,
       number: addressData.number,
@@ -243,7 +243,7 @@ const Clients = () => {
         title: "Sucesso",
         description: "Dados atualizados com sucesso!",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar:', error);
       toast({
         title: "Erro",
