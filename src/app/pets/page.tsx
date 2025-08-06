@@ -27,6 +27,7 @@ interface Pet {
   photo_url?: string;
   notes?: string;
   user_id: string;
+  created_at: string;
   profiles?: {
     full_name: string;
     phone?: string;
@@ -53,14 +54,14 @@ const Pets = () => {
     color: '',
     gender: '',
     notes: '',
-    selectedClientId: '', // For admin use
+    selectedClientId: '',
   });
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth');
     }
-  }, [user, loading, router.push]);
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (user) {
@@ -85,7 +86,6 @@ const Pets = () => {
         `)
         .order('created_at', { ascending: false });
 
-      // If not admin, only show user's pets
       if (!isAdmin && user?.id) {
         query = query.eq('user_id', user.id);
       }
@@ -93,7 +93,7 @@ const Pets = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setPets(data as unknown as Pet[] || []);
+      setPets(data as Pet[] || []);
     } catch (error) {
       console.error('Error fetching pets:', error);
       toast({
@@ -225,7 +225,6 @@ const Pets = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Add Pet Button */}
           <div className="flex justify-end mb-8">
             {!showForm && (
               <Button
@@ -238,7 +237,6 @@ const Pets = () => {
             )}
           </div>
 
-          {/* Form */}
           {showForm && (
             <Card className="mb-8">
               <CardHeader>
@@ -255,7 +253,6 @@ const Pets = () => {
                       <Select
                         value={formData.selectedClientId}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, selectedClientId: value }))}
-                        required={isAdmin}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o cliente" />
@@ -387,7 +384,6 @@ const Pets = () => {
             </Card>
           )}
 
-          {/* Pets List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pets.length === 0 ? (
               <div className="col-span-full text-center py-12">

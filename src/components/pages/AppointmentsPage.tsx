@@ -22,6 +22,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Ban, CalendarClock } from 'lucide-react';
+import { startOfDay } from 'date-fns';
 
 
 interface Pet {
@@ -587,7 +588,7 @@ export function AppointmentsPage() {
                                                         mode="single"
                                                         selected={selectedDate}
                                                         onSelect={setSelectedDate}
-                                                        disabled={(date) => date < new Date()}
+                                                        disabled={(date) => date < startOfDay(new Date())} // Permite agendar para o dia de hoje
                                                         initialFocus
                                                         className={cn("p-3 pointer-events-auto")}
                                                     />
@@ -718,7 +719,7 @@ export function AppointmentsPage() {
                                             <CardContent className="space-y-3">
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <CalendarIcon className="h-4 w-4" />
-                                                    {format(new Date(appointment.appointment_date), "PPP", { locale: ptBR })}
+                                                    {format(new Date(appointment.appointment_date + 'T00:00:00'), "PPP", { locale: ptBR })}
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <Clock className="h-4 w-4" />

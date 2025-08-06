@@ -9,8 +9,6 @@ import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +44,6 @@ const ClientRegistration = () => {
   const { hasClientData, loading: clientDataLoading } = useClientData();
   const { isAdmin, loading: roleLoading } = useUserRole();
 
-  // All hooks must be called at the top level, before any conditional logic
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -65,7 +62,6 @@ const ClientRegistration = () => {
     },
   });
 
-  // Redirect if user already has client data
   useEffect(() => {
     if (!clientDataLoading && hasClientData) {
       toast({
@@ -75,9 +71,8 @@ const ClientRegistration = () => {
       });
       router.push("/");
     }
-  }, [hasClientData, clientDataLoading, router.push, toast]);
+  }, [hasClientData, clientDataLoading, router, toast]);
 
-  // Show loading while checking client data
   if (clientDataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -120,7 +115,6 @@ const ClientRegistration = () => {
 
     setIsLoading(true);
     try {
-      // Primeiro, verificar se o perfil já existe
       const { data: existingProfile, error: checkError } = await supabase
         .from("profiles")
         .select("id")
@@ -136,7 +130,6 @@ const ClientRegistration = () => {
 
       let result;
       if (existingProfile) {
-        // Atualizar perfil existente
         result = await supabase
           .from("profiles")
           .update({
@@ -148,7 +141,6 @@ const ClientRegistration = () => {
           })
           .eq('id', user.id);
       } else {
-        // Inserir novo perfil (caso não exista)
         result = await supabase
           .from("profiles")
           .insert({
@@ -171,7 +163,6 @@ const ClientRegistration = () => {
         description: "Suas informações foram salvas com sucesso! Você receberá um email de boas-vindas.",
       });
 
-      // Enviar email de boas-vindas para novos clientes
       if (!existingProfile) {
         try {
           await sendWelcomeEmail(
@@ -181,13 +172,11 @@ const ClientRegistration = () => {
           console.log('Email de boas-vindas enviado com sucesso');
         } catch (emailError) {
           console.error('Erro ao enviar email de boas-vindas:', emailError);
-          // Não falha o cadastro se o email falhar
         }
       }
 
       form.reset();
 
-      // Redirecionar para boas-vindas apenas se não for admin
       if (isAdmin) {
         router.push("/dashboard");
       } else {

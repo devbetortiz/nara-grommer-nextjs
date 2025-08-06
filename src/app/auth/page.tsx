@@ -31,12 +31,11 @@ export default function Auth() {
     confirmPassword: ''
   });
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
       router.push('/');
     }
-  }, [user, loading, router.push]);
+  }, [user, loading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +98,6 @@ export default function Auth() {
           description: "Este e-mail já possui uma conta. Tente fazer login ou use outro e-mail.",
           variant: "destructive"
         });
-        // Trocar para aba de login automaticamente
         setCurrentTab('login');
         setLoginData(prev => ({ ...prev, email: signupData.email }));
       } else {
@@ -114,14 +112,12 @@ export default function Auth() {
         title: "Cadastro realizado!",
         description: "Verifique seu e-mail para confirmar sua conta.",
       });
-      // Limpar dados do formulário
       setSignupData({
         fullName: '',
         email: '',
         password: '',
         confirmPassword: ''
       });
-      // Trocar para aba de login
       setCurrentTab('login');
     }
   };
@@ -169,7 +165,6 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-secondary/30 p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* Logo e Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <div className="bg-primary p-3 rounded-full">
@@ -185,7 +180,6 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* Auth Forms */}
         <Card className="border-primary/20 shadow-lg">
           {!showForgotPassword ? (
             <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
@@ -373,7 +367,6 @@ export default function Auth() {
           )}
         </Card>
 
-        {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
           <p>Feito com ❤️ para o bem-estar dos pets</p>
         </div>

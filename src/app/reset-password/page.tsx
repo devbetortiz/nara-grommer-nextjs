@@ -16,7 +16,7 @@ export default function ResetPassword() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [validatingToken, setValidatingToken] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
@@ -25,13 +25,11 @@ export default function ResetPassword() {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    // Check if user is already authenticated and redirect
     if (user) {
       router.push('/');
       return;
     }
 
-    // Validate token
     const validateToken = async () => {
       if (!token) {
         toast({
@@ -79,7 +77,7 @@ export default function ResetPassword() {
     };
 
     validateToken();
-  }, [user, router.push, token, toast]);
+  }, [user, router, token, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +119,6 @@ export default function ResetPassword() {
         }
       });
 
-      // Parse the response since it might be a string
       const response = typeof data === 'string' ? JSON.parse(data) : data;
 
       if (error || !response.success) {
@@ -160,13 +157,12 @@ export default function ResetPassword() {
   }
 
   if (!tokenValid) {
-    return null; // Will redirect to /auth
+    return null;
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-secondary/30 p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* Logo e Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <div className="bg-primary p-3 rounded-full">
@@ -182,7 +178,6 @@ export default function ResetPassword() {
           </div>
         </div>
 
-        {/* Reset Password Form */}
         <Card className="border-primary/20 shadow-lg">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-xl">Redefinir Senha</CardTitle>
@@ -242,7 +237,6 @@ export default function ResetPassword() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
           <p>Feito com ❤️ para o bem-estar dos pets</p>
         </div>
