@@ -5,7 +5,19 @@ import type { Database } from './types';
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+// Verificação de variáveis de ambiente
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_URL is required. Add it to your .env.local file.');
+}
+
+if (!supabaseKey) {
+  throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required. Add it to your .env.local file.');
+}
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     storage: typeof window !== 'undefined' ? localStorage : undefined,
     persistSession: true,

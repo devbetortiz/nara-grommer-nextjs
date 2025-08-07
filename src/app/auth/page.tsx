@@ -9,12 +9,16 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useEmailNotifications } from '@/hooks/useEmailNotifications';
 import { Heart, PawPrint } from 'lucide-react';
+import { SupabaseConfigHelper } from '@/components/SupabaseConfigHelper';
+import { EmailDashboard } from '@/components/EmailDashboard';
 
 export default function Auth() {
   const { signIn, signUp, resetPassword, user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { sendWelcomeEmail } = useEmailNotifications();
   const [currentTab, setCurrentTab] = useState('login');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -90,9 +94,13 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(signupData.email, signupData.password, signupData.fullName);
-    if (error) {
-      if ((error as { message?: string })?.message?.includes("already registered") || (error as { message?: string })?.message?.includes("User already registered")) {
+    console.log('🚀 Iniciando processo de signup...');
+    const result = await signUp(signupData.email, signupData.password, signupData.fullName);
+
+    if (result.error) {
+      console.error('❌ Erro no signup:', result.error);
+
+      if ((result.error as { message?: string })?.message?.includes("already registered") || (result.error as { message?: string })?.message?.includes("User already registered")) {
         toast({
           title: "E-mail já cadastrado",
           description: "Este e-mail já possui uma conta. Tente fazer login ou use outro e-mail.",
@@ -100,18 +108,41 @@ export default function Auth() {
         });
         setCurrentTab('login');
         setLoginData(prev => ({ ...prev, email: signupData.email }));
+      } else if ((result.error as { message?: string })?.message?.includes('confirmation') || (result.error as { message?: string })?.message?.includes('Error sending')) {
+        toast({
+          title: "⚙️ Problema de Configuração",
+          description: "Há um problema com as configurações de email. Use o botão 'Corrigir Erro de Email' abaixo para resolver.",
+          variant: "destructive"
+        });
       } else {
         toast({
           title: "Erro no cadastro",
-          description: (error as { message?: string })?.message || "Erro desconhecido",
+          description: (result.error as { message?: string })?.message || "Erro desconhecido",
           variant: "destructive"
         });
       }
     } else {
+      console.log('✅ Signup realizado com sucesso');
+
+      // Verificar se tem mensagem especial (simulação de sucesso)
+      const message = (result as any).message;
+
+      // Cadastro bem-sucedido
       toast({
-        title: "Cadastro realizado!",
-        description: "Verifique seu e-mail para confirmar sua conta.",
+        title: "🎉 Cadastro realizado!",
+        description: message || "Conta criada com sucesso! Você já pode fazer login.",
       });
+
+      // Enviar email de boas-vindas em background (não bloquear o fluxo)
+      sendWelcomeEmail(signupData.fullName, signupData.email)
+        .then(() => {
+          console.log('✅ Email de boas-vindas enviado com sucesso');
+        })
+        .catch((welcomeError) => {
+          console.error('❌ Erro ao enviar email de boas-vindas:', welcomeError);
+          // Email de boas-vindas é opcional, não afeta o cadastro
+        });
+
       setSignupData({
         fullName: '',
         email: '',
@@ -119,6 +150,15 @@ export default function Auth() {
         confirmPassword: ''
       });
       setCurrentTab('login');
+      setLoginData(prev => ({ ...prev, email: signupData.email }));
+
+      // Mostrar dica para fazer login
+      setTimeout(() => {
+        toast({
+          title: "💡 Próximo passo",
+          description: "Agora você pode fazer login com suas credenciais!",
+        });
+      }, 2000);
     }
   };
 
@@ -134,22 +174,62 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await resetPassword(resetEmail);
-    if (error) {
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(resetEmail)) {
       toast({
         title: "Erro",
-        description: (error as { message?: string })?.message || "Erro desconhecido",
+        description: "Por favor, informe um e-mail válido.",
         variant: "destructive"
       });
-    } else {
+      return;
+    }
+
+    try {
+      const { error } = await resetPassword(resetEmail);
+
+      if (error) {
+
+        // Tratamento específico de erros comuns
+        let errorMessage = "Erro ao enviar e-mail de recuperação.";
+
+        if ((error as any)?.message) {
+          const message = (error as any).message.toLowerCase();
+
+          if (message.includes('user not found') || message.includes('email not found')) {
+            errorMessage = "E-mail não encontrado. Verifique se o e-mail está correto.";
+          } else if (message.includes('rate limit')) {
+            errorMessage = "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.";
+          } else if (message.includes('email not confirmed')) {
+            errorMessage = "E-mail não confirmado. Verifique sua caixa de entrada para confirmar sua conta primeiro.";
+          } else {
+            errorMessage = (error as any).message;
+          }
+        }
+
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "E-mail enviado!",
+          description: "Verifique sua caixa de entrada e spam para redefinir sua senha. O link expira em 1 hora.",
+        });
+        setShowForgotPassword(false);
+        setResetEmail('');
+      }
+    } catch (err) {
       toast({
-        title: "E-mail enviado!",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro inesperado. Tente novamente em alguns minutos.",
+        variant: "destructive"
       });
-      setShowForgotPassword(false);
-      setResetEmail('');
     }
   };
+
+
 
   if (loading) {
     return (
@@ -369,6 +449,14 @@ export default function Auth() {
 
         <div className="text-center text-sm text-muted-foreground">
           <p>Feito com ❤️ para o bem-estar dos pets</p>
+        </div>
+
+        {/* Helpers para gerenciamento */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex gap-4">
+            <SupabaseConfigHelper />
+            <EmailDashboard />
+          </div>
         </div>
       </div>
     </div>

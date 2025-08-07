@@ -1,134 +1,120 @@
+import { useState } from 'react';
+import { emailService } from '@/services/EmailService';
 
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-interface EmailData {
-  userName: string;
-  userEmail: string;
-  petName?: string;
-  serviceType?: string;
-  appointmentDate?: string;
-  appointmentTime?: string;
-  price?: number;
-  notes?: string;
-  appointmentId?: string;
-  userId?: string;
-}
-
-type EmailType = 'welcome' | 'appointment_confirmation' | 'appointment_reminder';
-
-export const useEmailNotifications = () => {
-
-  const { toast } = useToast();
-
-  const sendEmail = async (type: EmailType, to: string, data: EmailData) => {
-    try {
-      console.log(`Enviando email tipo: ${type} para: ${to}`);
-
-      const { data: response, error } = await supabase.functions.invoke('send-notification-email', {
-        body: {
-          type,
-          to,
-          data,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!response.success) {
-        throw new Error(response.error || 'Erro ao enviar email');
-      }
-
-      console.log('Email enviado com sucesso:', response);
-      return response;
-
-    } catch (error: unknown) {
-      console.error('Erro ao enviar email:', error);
-      toast({
-        title: "Erro ao enviar email",
-        description: (error as { message?: string })?.message || "Não foi possível enviar o email de notificação",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
+export function useEmailNotifications() {
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendWelcomeEmail = async (userName: string, userEmail: string) => {
-    return sendEmail('welcome', userEmail, {
-      userName,
-      userEmail,
-    });
+    setIsLoading(true);
+
+    try {
+      console.log('📧 [useEmailNotifications] Enviando email de boas-vindas:', { userName, userEmail });
+
+      const result = await emailService.sendWelcomeEmail(userEmail, userName);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao enviar email de boas-vindas');
+      }
+
+      console.log('✅ [useEmailNotifications] Email de boas-vindas enviado com sucesso!');
+      return { success: true, data: result };
+
+    } catch (error) {
+      console.error('❌ [useEmailNotifications] Erro ao enviar email de boas-vindas:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sendAppointmentConfirmation = async (
-    userEmail: string,
     userName: string,
-    petName: string,
-    serviceType: string,
-    appointmentDate: string,
-    appointmentTime: string,
-    appointmentId: string,
-    userId: string,
-    price?: number,
-    notes?: string
-  ) => {
-    return sendEmail('appointment_confirmation', userEmail, {
-      userName,
-      userEmail,
-      petName,
-      serviceType,
-      appointmentDate,
-      appointmentTime,
-      price,
-      notes,
-      appointmentId,
-      userId,
-    });
-  };
-
-  const sendAppointmentReminder = async (
     userEmail: string,
-    userName: string,
-    petName: string,
-    serviceType: string,
-    appointmentDate: string,
-    appointmentTime: string,
-    price?: number
+    appointmentData: {
+      petName: string;
+      appointmentDate: string;
+      appointmentTime: string;
+      veterinarianName: string;
+      clinicName?: string;
+      clinicAddress?: string;
+      confirmationUrl?: string;
+    }
   ) => {
-    return sendEmail('appointment_reminder', userEmail, {
-      userName,
-      userEmail,
-      petName,
-      serviceType,
-      appointmentDate,
-      appointmentTime,
-      price,
-    });
-  };
+    setIsLoading(true);
 
-  const formatAppointmentDate = (dateString: string) => {
     try {
-      const date = new Date(dateString + 'T00:00:00');
-      return date.toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      console.log('📧 [useEmailNotifications] Enviando confirmação de agendamento:', { userName, userEmail });
+
+      const result = await emailService.sendAppointmentConfirmation(userEmail, userName, {
+        ...appointmentData,
+        confirmationUrl: appointmentData.confirmationUrl || `${window.location.origin}/appointments`
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao enviar confirmação de agendamento');
+      }
+
+      console.log('✅ [useEmailNotifications] Confirmação de agendamento enviada com sucesso!');
+      return { success: true, data: result };
+
     } catch (error) {
-      console.error('Erro ao formatar data:', error);
-      return dateString;
+      console.error('❌ [useEmailNotifications] Erro ao enviar confirmação de agendamento:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const formatAppointmentTime = (timeString: string) => {
+  const sendAppointmentReminder = async (
+    userName: string,
+    userEmail: string,
+    appointmentData: {
+      petName: string;
+      appointmentDate: string;
+      appointmentTime: string;
+      veterinarianName: string;
+      clinicName?: string;
+      clinicAddress?: string;
+    }
+  ) => {
+    setIsLoading(true);
+
     try {
-      return timeString.slice(0, 5); // Remove seconds if present
+      console.log('📧 [useEmailNotifications] Enviando lembrete de agendamento:', { userName, userEmail });
+
+      const result = await emailService.sendAppointmentReminder(userEmail, userName, appointmentData);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao enviar lembrete de agendamento');
+      }
+
+      console.log('✅ [useEmailNotifications] Lembrete de agendamento enviado com sucesso!');
+      return { success: true, data: result };
+
     } catch (error) {
-      console.error('Erro ao formatar horário:', error);
-      return timeString;
+      console.error('❌ [useEmailNotifications] Erro ao enviar lembrete de agendamento:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkEmailServiceHealth = async () => {
+    setIsLoading(true);
+
+    try {
+      console.log('🏥 [useEmailNotifications] Verificando saúde do serviço de email...');
+
+      const result = await emailService.healthCheck();
+
+      console.log('📊 [useEmailNotifications] Status do serviço:', result);
+      return result;
+
+    } catch (error) {
+      console.error('❌ [useEmailNotifications] Erro no health check:', error);
+      return { healthy: false, error: error.message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,7 +122,7 @@ export const useEmailNotifications = () => {
     sendWelcomeEmail,
     sendAppointmentConfirmation,
     sendAppointmentReminder,
-    formatAppointmentDate,
-    formatAppointmentTime,
+    checkEmailServiceHealth,
+    isLoading
   };
-};
+}
