@@ -9,16 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+
 import { Heart, PawPrint } from 'lucide-react';
-import { SupabaseConfigHelper } from '@/components/SupabaseConfigHelper';
-import { EmailDashboard } from '@/components/EmailDashboard';
+
+
 
 export default function Auth() {
   const { signIn, signUp, resetPassword, user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { sendWelcomeEmail } = useEmailNotifications();
   const [currentTab, setCurrentTab] = useState('login');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -133,15 +132,7 @@ export default function Auth() {
         description: message || "Conta criada com sucesso! Você já pode fazer login.",
       });
 
-      // Enviar email de boas-vindas em background (não bloquear o fluxo)
-      sendWelcomeEmail(signupData.fullName, signupData.email)
-        .then(() => {
-          console.log('✅ Email de boas-vindas enviado com sucesso');
-        })
-        .catch((welcomeError) => {
-          console.error('❌ Erro ao enviar email de boas-vindas:', welcomeError);
-          // Email de boas-vindas é opcional, não afeta o cadastro
-        });
+
 
       setSignupData({
         fullName: '',
@@ -451,13 +442,7 @@ export default function Auth() {
           <p>Feito com ❤️ para o bem-estar dos pets</p>
         </div>
 
-        {/* Helpers para gerenciamento */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-4">
-            <SupabaseConfigHelper />
-            <EmailDashboard />
-          </div>
-        </div>
+
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { Header } from '@/components/Header';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+
 import { Ban, CalendarClock } from 'lucide-react';
 import { startOfDay } from 'date-fns';
 
@@ -89,20 +89,7 @@ export function AppointmentsPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { isAdmin, loading: roleLoading } = useUserRole();
-    const { sendAppointmentConfirmation } = useEmailNotifications();
 
-    // Helper functions for date/time formatting
-    const formatAppointmentDate = (date: Date): string => {
-        return date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
-    const formatAppointmentTime = (time: string): string => {
-        return time;
-    };
     const [pets, setPets] = useState<Pet[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -385,48 +372,10 @@ export function AppointmentsPage() {
 
             toast({
                 title: "Sucesso!",
-                description: "Agendamento criado com sucesso! Você receberá um email de confirmação.",
+                description: "Agendamento criado com sucesso!",
             });
 
-            // Buscar dados do usuário e pet para o email
-            try {
-                const userId = appointmentData.user_id; // Usar sempre o user_id do agendamento
 
-                // Buscar dados do usuário
-                const { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('full_name, email')
-                    .eq('id', userId)
-                    .single();
-
-                // Buscar dados do pet
-                const { data: petData } = await supabase
-                    .from('pets')
-                    .select('name')
-                    .eq('id', formData.pet_id)
-                    .single();
-
-                if (profileData && petData) {
-                    await sendAppointmentConfirmation(
-                        profileData.full_name || 'Cliente',
-                        profileData.email || user.email!,
-                        {
-                            petName: petData.name,
-                            appointmentDate: formatAppointmentDate(selectedDate || new Date()),
-                            appointmentTime: formatAppointmentTime(formData.appointment_time),
-                            veterinarianName: 'Dr. Veterinário',
-                            clinicName: 'Clínica Nara Grommer',
-                            clinicAddress: 'Endereço da clínica',
-                            confirmationUrl: `${window.location.origin}/appointments`
-                        }
-                    );
-
-                    console.log('Email de confirmação enviado com sucesso');
-                }
-            } catch (emailError) {
-                console.error('Erro ao enviar email de confirmação:', emailError);
-                // Não falha o agendamento se o email falhar
-            }
 
             setFormData({
                 pet_id: '',

@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClientData } from "@/hooks/useClientData";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Header } from "@/components/Header";
-import { useEmailNotifications } from "@/hooks/useEmailNotifications";
+
 
 const clientSchema = z.object({
   full_name: z.string().min(1, "Nome completo é obrigatório"),
@@ -39,7 +39,7 @@ const ClientRegistration = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { sendWelcomeEmail } = useEmailNotifications();
+
   const { user } = useAuth();
   const { hasClientData, loading: clientDataLoading } = useClientData();
   const { isAdmin } = useUserRole();
@@ -160,20 +160,8 @@ const ClientRegistration = () => {
 
       toast({
         title: "Sucesso",
-        description: "Suas informações foram salvas com sucesso! Você receberá um email de boas-vindas.",
+        description: "Suas informações foram salvas com sucesso!",
       });
-
-      if (!existingProfile) {
-        try {
-          await sendWelcomeEmail(
-            data.full_name,
-            user.email!
-          );
-          console.log('Email de boas-vindas enviado com sucesso');
-        } catch (emailError) {
-          console.error('Erro ao enviar email de boas-vindas:', emailError);
-        }
-      }
 
       form.reset();
 
