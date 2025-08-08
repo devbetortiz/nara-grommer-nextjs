@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,11 +17,12 @@ function ResetPasswordContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [validatingToken, setValidatingToken] = useState(true);
-  const [tokenValid, setTokenValid] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const token = searchParams.get('token');
+
+  // Check for session from URL hash fragments (Supabase Auth)
+  const [session, setSession] = useState<{ user: { email: string } } | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -30,54 +30,73 @@ function ResetPasswordContent() {
       return;
     }
 
-    const validateToken = async () => {
-      if (!token) {
-        toast({
-          title: "Erro",
-          description: "Token de redefinição não encontrado.",
-          variant: "destructive"
-        });
-        router.push('/auth');
-        return;
-      }
-
+    const checkSession = async () => {
       try {
-        const response = await fetch(
-          `https://dsmtvpcdifooagtjqjve.supabase.co/functions/v1/validate-reset-token?token=${encodeURIComponent(token)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        // Check if we have session data in the URL hash
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
-        const result = await response.json();
-
-        if (!response.ok || !result.valid) {
+        if (error) {
+          console.error('Error getting session:', error);
           toast({
-            title: "Token inválido",
-            description: result?.error || "O link de redefinição é inválido ou expirou.",
+            title: "Erro",
+            description: "Erro ao verificar sessão de redefinição.",
             variant: "destructive"
           });
           router.push('/auth');
-        } else {
-          setTokenValid(true);
+          return;
         }
-      } catch {
+
+        if (!currentSession) {
+          // Check URL parameters for access_token (Supabase magic link)
+          const accessToken = searchParams.get('access_token');
+          const refreshToken = searchParams.get('refresh_token');
+          const type = searchParams.get('type');
+
+          if (accessToken && refreshToken && type === 'recovery') {
+            // Set the session with the tokens from URL
+            const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+
+            if (sessionError) {
+              toast({
+                title: "Link inválido",
+                description: "O link de redefinição é inválido ou expirou.",
+                variant: "destructive"
+              });
+              router.push('/auth');
+              return;
+            }
+
+            setSession(sessionData.session);
+          } else {
+            toast({
+              title: "Link inválido",
+              description: "Link de redefinição não encontrado ou inválido.",
+              variant: "destructive"
+            });
+            router.push('/auth');
+            return;
+          }
+        } else {
+          setSession(currentSession);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
         toast({
           title: "Erro",
-          description: "Erro ao validar token de redefinição.",
+          description: "Erro ao verificar link de redefinição.",
           variant: "destructive"
         });
         router.push('/auth');
       } finally {
-        setValidatingToken(false);
+        setSessionChecked(true);
       }
     };
 
-    validateToken();
-  }, [user, router, token, toast]);
+    checkSession();
+  }, [user, router, searchParams, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,22 +128,26 @@ function ResetPasswordContent() {
       return;
     }
 
+    if (!session) {
+      toast({
+        title: "Erro",
+        description: "Sessão de redefinição não encontrada.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('validate-reset-token', {
-        body: {
-          token: token,
-          newPassword: newPassword
-        }
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
 
-      const response = typeof data === 'string' ? JSON.parse(data) : data;
-
-      if (error || !response.success) {
+      if (error) {
         toast({
           title: "Erro",
-          description: response?.error || "Erro ao redefinir senha.",
+          description: error.message || "Erro ao redefinir senha.",
           variant: "destructive"
         });
       } else {
@@ -132,6 +155,9 @@ function ResetPasswordContent() {
           title: "Senha atualizada!",
           description: "Sua senha foi redefinida com sucesso. Faça login com sua nova senha.",
         });
+
+        // Sign out the user so they can login with the new password
+        await supabase.auth.signOut();
         router.push('/auth');
       }
     } catch {
@@ -145,18 +171,18 @@ function ResetPasswordContent() {
     }
   };
 
-  if (validatingToken) {
+  if (!sessionChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted to-secondary/30">
         <div className="text-center">
           <PawPrint className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Validando token...</p>
+          <p className="text-muted-foreground">Verificando link de redefinição...</p>
         </div>
       </div>
     );
   }
 
-  if (!tokenValid) {
+  if (!session) {
     return null;
   }
 
