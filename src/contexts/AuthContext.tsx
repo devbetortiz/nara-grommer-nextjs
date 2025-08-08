@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          emailRedirectTo: null, // Explicitamente não usar redirecionamento
+          emailRedirectTo: undefined, // Explicitamente não usar redirecionamento
           captchaToken: undefined,
           data: {
             full_name: fullName
@@ -68,8 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('🚨 [AuthContext] Erro detalhado na primeira tentativa:', {
           message: error.message,
-          status: error.status,
-          statusText: error.statusText,
+          status: error.status || 'unknown',
           details: error
         });
       }

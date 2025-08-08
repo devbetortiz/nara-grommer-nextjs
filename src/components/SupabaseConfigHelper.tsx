@@ -9,7 +9,7 @@ import { checkSupabaseAuthSettings } from '@/utils/fix-supabase-settings';
 
 export function SupabaseConfigHelper() {
     const [isOpen, setIsOpen] = useState(false);
-    const [checkResult] = useState<{ status: string; message: string } | null>(null);
+    // Estado removido pois não está sendo usado
 
     const handleCheck = async () => {
         await checkSupabaseAuthSettings();

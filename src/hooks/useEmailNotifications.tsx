@@ -46,7 +46,10 @@ export function useEmailNotifications() {
       console.log('📧 [useEmailNotifications] Enviando confirmação de agendamento:', { userName, userEmail });
 
       const result = await emailService.sendAppointmentConfirmation(userEmail, userName, {
+        userName,
         ...appointmentData,
+        clinicName: appointmentData.clinicName || 'Clínica Nara Grommer',
+        clinicAddress: appointmentData.clinicAddress || 'Endereço da clínica',
         confirmationUrl: appointmentData.confirmationUrl || `${window.location.origin}/appointments`
       });
 
@@ -82,7 +85,12 @@ export function useEmailNotifications() {
     try {
       console.log('📧 [useEmailNotifications] Enviando lembrete de agendamento:', { userName, userEmail });
 
-      const result = await emailService.sendAppointmentReminder(userEmail, userName, appointmentData);
+      const result = await emailService.sendAppointmentReminder(userEmail, userName, {
+        userName,
+        ...appointmentData,
+        clinicName: appointmentData.clinicName || 'Clínica Nara Grommer',
+        clinicAddress: appointmentData.clinicAddress || 'Endereço da clínica'
+      });
 
       if (!result.success) {
         throw new Error(result.error || 'Erro ao enviar lembrete de agendamento');
@@ -112,7 +120,8 @@ export function useEmailNotifications() {
 
     } catch (error) {
       console.error('❌ [useEmailNotifications] Erro no health check:', error);
-      return { healthy: false, error: error.message };
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      return { healthy: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }

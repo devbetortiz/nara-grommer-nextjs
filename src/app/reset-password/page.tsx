@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Heart, PawPrint } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Session } from '@supabase/supabase-js';
 
 function ResetPasswordContent() {
   const { user } = useAuth();
@@ -21,7 +22,7 @@ function ResetPasswordContent() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Check for session from URL hash fragments (Supabase Auth)
-  const [session, setSession] = useState<{ user: { email: string } } | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {

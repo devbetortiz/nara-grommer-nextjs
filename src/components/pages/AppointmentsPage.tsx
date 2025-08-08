@@ -89,7 +89,20 @@ export function AppointmentsPage() {
     const router = useRouter();
     const { toast } = useToast();
     const { isAdmin, loading: roleLoading } = useUserRole();
-    const { sendAppointmentConfirmation, formatAppointmentDate, formatAppointmentTime } = useEmailNotifications();
+    const { sendAppointmentConfirmation } = useEmailNotifications();
+
+    // Helper functions for date/time formatting
+    const formatAppointmentDate = (date: Date): string => {
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
+    const formatAppointmentTime = (time: string): string => {
+        return time;
+    };
     const [pets, setPets] = useState<Pet[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -395,18 +408,17 @@ export function AppointmentsPage() {
 
                 if (profileData && petData) {
                     await sendAppointmentConfirmation(
-                        profileData.email || user.email!,
                         profileData.full_name || 'Cliente',
-                        petData.name,
-                        formData.service_type,
-                        formatAppointmentDate(selectedDate ?
-                            `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-                            : ''),
-                        formatAppointmentTime(formData.appointment_time),
-                        insertedAppointment.id,
-                        userId,
-                        formData.price ? parseFloat(formData.price) : undefined,
-                        formData.notes || undefined
+                        profileData.email || user.email!,
+                        {
+                            petName: petData.name,
+                            appointmentDate: formatAppointmentDate(selectedDate || new Date()),
+                            appointmentTime: formatAppointmentTime(formData.appointment_time),
+                            veterinarianName: 'Dr. Veterinário',
+                            clinicName: 'Clínica Nara Grommer',
+                            clinicAddress: 'Endereço da clínica',
+                            confirmationUrl: `${window.location.origin}/appointments`
+                        }
                     );
 
                     console.log('Email de confirmação enviado com sucesso');
