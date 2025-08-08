@@ -21,7 +21,7 @@ function ResetPasswordContent() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Check for session from URL hash fragments (Supabase Auth)
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<{ user: { email: string } } | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
@@ -160,7 +160,7 @@ function ResetPasswordContent() {
         await supabase.auth.signOut();
         router.push('/auth');
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao redefinir a senha.",

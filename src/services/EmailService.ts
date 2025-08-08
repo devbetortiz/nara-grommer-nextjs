@@ -4,7 +4,7 @@ export interface EmailData {
   to: string;
   subject: string;
   userName: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface WelcomeEmailData extends EmailData {
@@ -47,7 +47,7 @@ class EmailService {
    * Envia um email usando a edge function do Supabase
    */
   private async sendEmail(type: EmailType, emailData: EmailData): Promise<{ success: boolean; error?: string }> {
-    let lastError: any = null;
+    let lastError: unknown = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
@@ -199,11 +199,17 @@ class EmailService {
   /**
    * Extrai mensagem de erro de diferentes tipos de erro
    */
-  private extractErrorMessage(error: any): string {
+  private extractErrorMessage(error: unknown): string {
     if (typeof error === 'string') return error;
-    if (error?.message) return error.message;
-    if (error?.error?.message) return error.error.message;
-    if (error?.details) return error.details;
+    if (error && typeof error === 'object') {
+      const err = error as Record<string, unknown>;
+      if (err.message && typeof err.message === 'string') return err.message;
+      if (err.error && typeof err.error === 'object') {
+        const nestedErr = err.error as Record<string, unknown>;
+        if (nestedErr.message && typeof nestedErr.message === 'string') return nestedErr.message;
+      }
+      if (err.details && typeof err.details === 'string') return err.details;
+    }
     return 'Erro desconhecido no serviço de email';
   }
 

@@ -9,11 +9,10 @@ import { checkSupabaseAuthSettings } from '@/utils/fix-supabase-settings';
 
 export function SupabaseConfigHelper() {
     const [isOpen, setIsOpen] = useState(false);
-    const [checkResult, setCheckResult] = useState<any>(null);
+    const [checkResult] = useState<{ status: string; message: string } | null>(null);
 
     const handleCheck = async () => {
-        const result = await checkSupabaseAuthSettings();
-        setCheckResult(result);
+        await checkSupabaseAuthSettings();
     };
 
     if (!isOpen) {
@@ -38,7 +37,7 @@ export function SupabaseConfigHelper() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-orange-700">
                     <Settings className="h-5 w-5" />
-                    Corrigir "Error sending confirmation email"
+                    Corrigir &quot;Error sending confirmation email&quot;
                 </CardTitle>
                 <CardDescription>
                     Guia para resolver o erro de confirmação por email no Supabase
@@ -69,9 +68,9 @@ export function SupabaseConfigHelper() {
                         </div>
                         <div className="text-sm text-gray-600 space-y-1">
                             <p>• Vá para <strong>Authentication → Settings</strong></p>
-                            <p>• Encontre <strong>"Enable email confirmations"</strong></p>
+                            <p>• Encontre <strong>&quot;Enable email confirmations&quot;</strong></p>
                             <p>• <strong>DESABILITE</strong> esta opção</p>
-                            <p>• Clique em <strong>"Save"</strong></p>
+                            <p>• Clique em <strong>&quot;Save&quot;</strong></p>
                             <p>• Teste o cadastro novamente</p>
                         </div>
                     </div>
@@ -83,7 +82,7 @@ export function SupabaseConfigHelper() {
                         <div className="text-sm text-gray-600 space-y-1">
                             <p>• Vá para <strong>Authentication → Settings → SMTP Settings</strong></p>
                             <p>• Configure um provedor (Gmail, SendGrid, Resend)</p>
-                            <p>• Ative a opção <strong>"Enable Custom SMTP"</strong></p>
+                            <p>• Ative a opção <strong>&quot;Enable Custom SMTP&quot;</strong></p>
                             <p>• Preencha os dados do servidor SMTP</p>
                             <p>• Teste o envio de email</p>
                         </div>

@@ -125,7 +125,7 @@ export default function Auth() {
       console.log('✅ Signup realizado com sucesso');
 
       // Verificar se tem mensagem especial (simulação de sucesso)
-      const message = (result as any).message;
+      const message = (result as { message?: string }).message;
 
       // Cadastro bem-sucedido
       toast({
@@ -193,8 +193,8 @@ export default function Auth() {
         // Tratamento específico de erros comuns
         let errorMessage = "Erro ao enviar e-mail de recuperação.";
 
-        if ((error as any)?.message) {
-          const message = (error as any).message.toLowerCase();
+        if (error && typeof error === 'object' && 'message' in error) {
+          const message = (error.message as string).toLowerCase();
 
           if (message.includes('user not found') || message.includes('email not found')) {
             errorMessage = "E-mail não encontrado. Verifique se o e-mail está correto.";
@@ -203,7 +203,7 @@ export default function Auth() {
           } else if (message.includes('email not confirmed')) {
             errorMessage = "E-mail não confirmado. Verifique sua caixa de entrada para confirmar sua conta primeiro.";
           } else {
-            errorMessage = (error as any).message;
+            errorMessage = error.message as string;
           }
         }
 
@@ -220,7 +220,7 @@ export default function Auth() {
         setShowForgotPassword(false);
         setResetEmail('');
       }
-    } catch (err) {
+    } catch {
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro inesperado. Tente novamente em alguns minutos.",

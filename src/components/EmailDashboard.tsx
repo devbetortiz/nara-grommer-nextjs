@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, Mail, Send, Settings, Heart } from 'lucide-react';
@@ -17,13 +17,20 @@ export function EmailDashboard() {
     const [isOpen, setIsOpen] = useState(false);
     const [testEmail, setTestEmail] = useState('');
     const [testName, setTestName] = useState('');
-    const [healthStatus, setHealthStatus] = useState<any>(null);
-    const [testResults, setTestResults] = useState<any[]>([]);
+    const [healthStatus, setHealthStatus] = useState<{ healthy: boolean; error?: string } | null>(null);
+    const [testResults, setTestResults] = useState<Array<{
+        type: string;
+        email: string;
+        name: string;
+        success: boolean;
+        timestamp: string;
+        details?: unknown;
+        error?: string;
+    }>>([]);
 
     const {
         sendWelcomeEmail,
         sendAppointmentConfirmation,
-        sendAppointmentReminder,
         checkEmailServiceHealth,
         isLoading
     } = useEmailNotifications();
@@ -42,7 +49,8 @@ export function EmailDashboard() {
             });
         } catch (error) {
             console.error('Erro no health check:', error);
-            setHealthStatus({ healthy: false, error: error.message });
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            setHealthStatus({ healthy: false, error: errorMessage });
         }
     };
 
@@ -75,20 +83,21 @@ export function EmailDashboard() {
                 description: `Enviado com sucesso para ${testEmail}`,
             });
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
             const testResult = {
                 type: 'welcome',
                 email: testEmail,
                 name: testName,
                 success: false,
                 timestamp: new Date().toISOString(),
-                error: error.message
+                error: errorMessage
             };
 
             setTestResults(prev => [testResult, ...prev.slice(0, 9)]);
 
             toast({
                 title: "❌ Erro no Email",
-                description: error.message,
+                description: errorMessage,
                 variant: "destructive"
             });
         }
@@ -132,20 +141,21 @@ export function EmailDashboard() {
                 description: `Enviado com sucesso para ${testEmail}`,
             });
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
             const testResult = {
                 type: 'appointment',
                 email: testEmail,
                 name: testName,
                 success: false,
                 timestamp: new Date().toISOString(),
-                error: error.message
+                error: errorMessage
             };
 
             setTestResults(prev => [testResult, ...prev.slice(0, 9)]);
 
             toast({
                 title: "❌ Erro no Email",
-                description: error.message,
+                description: errorMessage,
                 variant: "destructive"
             });
         }
@@ -282,7 +292,7 @@ export function EmailDashboard() {
                         {testResults.length === 0 ? (
                             <Alert>
                                 <AlertDescription>
-                                    Nenhum teste realizado ainda. Use a aba "Teste de Emails" para começar.
+                                    Nenhum teste realizado ainda. Use a aba &quot;Teste de Emails&quot; para começar.
                                 </AlertDescription>
                             </Alert>
                         ) : (
